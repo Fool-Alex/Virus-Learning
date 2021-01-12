@@ -8,13 +8,6 @@ includelib      kernel32.lib
 include         user32.inc
 includelib      user32.lib
 
-@pushsz MACRO  str
-	LOCAL  next
-	call   next
-	db     str,0
-	next:
-ENDM
-
 PEGame SEGMENT 
 fd WIN32_FIND_DATA <>
 Dsektop   db 'C:/Users/XXX/Desktop/',0       ;修改对应desktop的路径
